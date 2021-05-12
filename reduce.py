@@ -1,21 +1,33 @@
-#!/usr/bin/env python
-
+#!/usr/bin/python
+import json
 import sys
 
 def reduce(lines):
     lastKey = None
     sum = 0
     for line in lines:
-        for poz in line[2]:
-            key, value = poz.split("\t")
-            if key != lastKey and lastKey is not None:
-               print("{0}\t{1}".format(lastKey, sum))
-               sum = 0
+        data = json.loads(line)
+        key = data["word"]
+        value = data["count"]
 
-            sum += int(value)
-            lastKey = key
+        if key != lastKey and lastKey is not None:
+            txtDlaReduktora = '{"beerId":' + str(data["beerId"]) + ', "word":"'
+            txtDlaReduktora = txtDlaReduktora + lastKey + '", "count":' + str(sum) + '}'
+            print(txtDlaReduktora)
+            sum = 0
+
+        sum += int(value)
+        lastKey = key
 
 if __name__ == "__main__":
    reduce(sys.stdin)
 
-#hadoop-streaming -input /user/hadoop -output /tmp/m -mapper ./map.py -reducer ./reduce.py -file ./reduce.py -file ./map.py
+#hadoop fs -copyToLocal [s3://bucket/plik] .
+#hdfs dfs -put [plik] [gdzie]
+#hadoop fs -getmerge [sciezka folderu na hdfs gdzie sa nasze pliki wynikowe w czesciach] [adres i nazwa nowego polaczonego pliku z wynikami na hadoopie]
+
+#hadoop-streaming -input /m -output /m/results/1 -mapper ./map.py -reducer ./reduce.py -file ./reduce.py -file ./map.py
+#yarn logs -applicationId application_1620769307865_0004 -log_files stderr
+
+
+
